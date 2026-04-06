@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BG Affiliate Agent — Prince</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--accent:#00e5a0;--accent2:#0066ff;--text:#f0f0f5;--text2:#8888aa;--text3:#555570;--amber:#f5a623;--red:#ff4d6d;--purple:#9b7fe8;--radius:12px;--radius-sm:8px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.app{display:grid;grid-template-columns:240px 1fr;grid-template-rows:54px 1fr;height:100vh}
+.topbar{grid-column:1/-1;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px}
+.logo{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.05em;display:flex;align-items:center;gap:10px}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.status-pill{display:flex;align-items:center;gap:6px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.2);border-radius:20px;padding:4px 12px;font-size:11px;color:var(--accent);font-family:'DM Mono',monospace}
+.status-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:16px 14px;display:flex;flex-direction:column;gap:20px;overflow-y:auto}
+.sb-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--radius-sm);font-size:12px;cursor:pointer;color:var(--text2);transition:all 0.15s;border:1px solid transparent}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:rgba(0,229,160,0.08);color:var(--accent);border-color:rgba(0,229,160,0.15)}
+.pipe-row{display:flex;justify-content:space-between;padding:5px 0;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)}
+.pipe-row:last-child{border-bottom:none}
+.pipe-count{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--text)}
+.pipe-count.green{color:var(--accent)}
+.tool-chip{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:6px;font-size:10px;color:var(--text2);background:var(--bg3);margin-bottom:4px;font-family:'DM Mono',monospace}
+.chip-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.memory-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;font-size:10px;color:var(--text2);line-height:1.7;font-family:'DM Mono',monospace;min-height:56px;white-space:pre-wrap}
+.main{display:flex;flex-direction:column;background:var(--bg);overflow:hidden}
+.tab-content{display:none;flex:1;overflow-y:auto;padding:20px}
+.tab-content.active{display:flex;flex-direction:column;gap:18px}
+.chat-tab{display:none;flex:1;flex-direction:column;overflow:hidden}
+.chat-tab.active{display:flex}
+.messages{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:14px}
+.messages::-webkit-scrollbar{width:3px}
+.messages::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.msg{display:flex;gap:10px;align-items:flex-start;animation:fadeUp 0.2s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{flex-direction:row-reverse}
+.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;font-family:'Syne',sans-serif}
+.av.agent{background:rgba(0,229,160,0.12);color:var(--accent);border:1px solid rgba(0,229,160,0.25)}
+.av.user{background:rgba(0,102,255,0.12);color:#6699ff;border:1px solid rgba(0,102,255,0.25)}
+.bubble{max-width:78%;padding:11px 14px;border-radius:14px;font-size:13px;line-height:1.6}
+.bubble.agent{background:var(--bg3);border:1px solid var(--border);border-top-left-radius:4px;color:var(--text)}
+.bubble.user{background:rgba(0,102,255,0.15);border:1px solid rgba(0,102,255,0.25);border-top-right-radius:4px;color:var(--text)}
+.bubble.thinking{background:var(--bg3);border:1px dashed var(--border2);color:var(--text2);font-style:italic}
+.tool-block{background:rgba(0,229,160,0.04);border:1px solid rgba(0,229,160,0.15);border-left:2px solid var(--accent);border-radius:var(--radius-sm);padding:7px 10px;margin:5px 0;font-size:11px;font-family:'DM Mono',monospace;max-width:78%}
+.tool-label{color:var(--accent);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:2px}
+.tool-desc{color:var(--text2)}
+.quick-bar{padding:8px 20px;display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.qchip{padding:4px 11px;font-size:10px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-family:'DM Mono',monospace;transition:all 0.15s}
+.qchip:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,229,160,0.06)}
+.input-area{padding:14px 20px;border-top:1px solid var(--border);background:var(--bg2);display:flex;gap:8px;align-items:flex-end;flex-shrink:0}
+.chat-inp{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:9px 13px;font-size:13px;font-family:'Inter',sans-serif;color:var(--text);resize:none;min-height:40px;max-height:110px;transition:border 0.15s}
+.chat-inp:focus{outline:none;border-color:rgba(0,229,160,0.4)}
+.chat-inp::placeholder{color:var(--text3)}
+.send-btn{width:40px;height:40px;border-radius:var(--radius-sm);background:var(--accent);color:#000;border:none;cursor:pointer;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s}
+.send-btn:hover{background:#00ffb3;transform:scale(1.04)}
+.send-btn:disabled{opacity:0.3;cursor:not-allowed;transform:none}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg.full{grid-column:1/-1}
+label{font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;letter-spacing:0.05em}
+input,select,textarea{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:8px 11px;font-size:13px;font-family:'Inter',sans-serif;color:var(--text);transition:border 0.15s;width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:rgba(0,229,160,0.4)}
+input::placeholder,textarea::placeholder{color:var(--text3)}
+select option{background:var(--bg3)}
+textarea{resize:vertical;min-height:65px}
+.btn{padding:8px 16px;border-radius:var(--radius-sm);font-size:12px;font-family:'Syne',sans-serif;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--bg3);color:var(--text);transition:all 0.15s}
+.btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,229,160,0.06)}
+.btn-primary{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600}
+.btn-primary:hover{background:#00ffb3;color:#000}
+.btn-sm{padding:4px 10px;font-size:11px}
+.btn-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.section-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:600}
+.section-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.lead-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.lead-item:last-child{border-bottom:none}
+.lead-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:'Syne',sans-serif;flex-shrink:0}
+.lead-info{flex:1;min-width:0}
+.lead-name{font-weight:500;font-size:13px;font-family:'Syne',sans-serif}
+.lead-meta{font-size:10px;color:var(--text2);margin-top:2px;font-family:'DM Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:600;font-family:'DM Mono',monospace;letter-spacing:0.04em}
+.bg-green{background:rgba(0,229,160,0.1);color:var(--accent);border:1px solid rgba(0,229,160,0.2)}
+.bg-blue{background:rgba(0,102,255,0.1);color:#6699ff;border:1px solid rgba(0,102,255,0.2)}
+.bg-amber{background:rgba(245,166,35,0.1);color:var(--amber);border:1px solid rgba(245,166,35,0.2)}
+.bg-purple{background:rgba(155,127,232,0.1);color:var(--purple);border:1px solid rgba(155,127,232,0.2)}
+.bg-gray{background:rgba(255,255,255,0.05);color:var(--text2);border:1px solid var(--border2)}
+.empty-state{text-align:center;padding:36px 16px;color:var(--text3);font-size:13px}
+.metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.metric{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.metric-val{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;margin-top:4px}
+.metric-label{font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;letter-spacing:0.05em}
+.mv-accent{color:var(--accent)}.mv-amber{color:var(--amber)}.mv-purple{color:var(--purple)}
+.pipeline-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.pipe-col{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;min-height:180px}
+.pipe-col-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);margin-bottom:10px;display:flex;justify-content:space-between}
+.pipe-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px;margin-bottom:7px;font-size:11px}
+.pipe-card-name{font-weight:500;font-family:'Syne',sans-serif;font-size:12px;margin-bottom:3px}
+.pipe-card-type{font-size:10px;color:var(--text2);font-family:'DM Mono',monospace}
+.fu-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:10px}
+.fu-head{display:flex;align-items:center;gap:9px;margin-bottom:8px;flex-wrap:wrap}
+.days-pill{background:rgba(245,166,35,0.1);color:var(--amber);border:1px solid rgba(245,166,35,0.2);border-radius:20px;font-size:10px;padding:2px 9px;font-family:'DM Mono',monospace}
+.ai-out{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-size:11px;line-height:1.7;color:var(--text2);white-space:pre-wrap;margin-top:10px;font-family:'DM Mono',monospace}
+.setup-step{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--border)}
+.setup-step:last-child{border-bottom:none}
+.step-num{width:28px;height:28px;border-radius:50%;background:rgba(0,229,160,0.1);border:1px solid rgba(0,229,160,0.3);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;font-family:'DM Mono',monospace}
+.step-title{font-weight:500;font-family:'Syne',sans-serif;font-size:13px;margin-bottom:4px}
+.step-desc{font-size:12px;color:var(--text2);line-height:1.6}
+.info-box{border-radius:var(--radius);padding:14px 16px;display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+.info-box.warn{background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.25)}
+.info-box.ok{background:rgba(0,229,160,0.06);border:1px solid rgba(0,229,160,0.2)}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="logo"><div class="logo-dot"></div>BG AFFILIATE AGENT</div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <div class="status-pill"><div class="status-dot"></div>Agent online</div>
+      <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)" id="date-el"></span>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div>
+      <div class="sb-label">Navigation</div>
+      <div class="nav-item active" onclick="gotoTab('chat',this)">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 3h12v8H9l-3 2v-2H2V3z" stroke="currentColor" stroke-width="1.3" fill="none"/></svg>Agent chat
+      </div>
+      <div class="nav-item" onclick="gotoTab('leads',this)">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.3"/></svg>Leads
+      </div>
+      <div class="nav-item" onclick="gotoTab('followups',this)">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Follow-ups
+      </div>
+      <div class="nav-item" onclick="gotoTab('pipeline',this)">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="4" height="10" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="6" y="5" width="4" height="8" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="11" y="7" width="4" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/></svg>Pipeline
+      </div>
+      <div class="nav-item" onclick="gotoTab('setup',this)">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Setup
+      </div>
+    </div>
+    <div>
+      <div class="sb-label">Pipeline</div>
+      <div class="pipe-row"><span>New</span><span class="pipe-count" id="sb-new">0</span></div>
+      <div class="pipe-row"><span>Contacted</span><span class="pipe-count" id="sb-contacted">0</span></div>
+      <div class="pipe-row"><span>Replied</span><span class="pipe-count" id="sb-replied">0</span></div>
+      <div class="pipe-row"><span>Negotiating</span><span class="pipe-count" id="sb-neg">0</span></div>
+      <div class="pipe-row"><span>Closed</span><span class="pipe-count green" id="sb-closed">0</span></div>
+    </div>
+    <div>
+      <div class="sb-label">Tools active</div>
+      <div class="tool-chip"><div class="chip-dot" style="background:var(--accent)"></div>add_lead</div>
+      <div class="tool-chip"><div class="chip-dot" style="background:#6699ff"></div>write_email</div>
+      <div class="tool-chip"><div class="chip-dot" style="background:var(--amber)"></div>log_sent</div>
+      <div class="tool-chip"><div class="chip-dot" style="background:var(--red)"></div>followup</div>
+      <div class="tool-chip"><div class="chip-dot" style="background:var(--purple)"></div>draft_reply</div>
+      <div class="tool-chip"><div class="chip-dot" style="background:var(--text2)"></div>pipeline</div>
+    </div>
+    <div style="margin-top:auto">
+      <div class="sb-label">Memory</div>
+      <div class="memory-box" id="memory-box">No leads yet.</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- CHAT -->
+    <div class="chat-tab active" id="tab-chat">
+      <div class="quick-bar">
+        <button class="qchip" onclick="qs('Add a new lead for me')">+ New lead</button>
+        <button class="qchip" onclick="qs('Write outreach email for my latest lead')">Write email</button>
+        <button class="qchip" onclick="qs('Who needs a follow-up today?')">Follow-ups</button>
+        <button class="qchip" onclick="qs('Show my full pipeline status')">Pipeline</button>
+        <button class="qchip" onclick="qs('A lead just replied saying they are interested — draft a reply')">Draft reply</button>
+        <button class="qchip" onclick="qs('Give me a summary of all my leads')">Summary</button>
+      </div>
+      <div class="messages" id="messages"></div>
+      <div class="input-area">
+        <textarea class="chat-inp" id="user-inp" placeholder="Tell the agent what to do..." rows="1" onkeydown="handleKey(event)" oninput="autoH(this)"></textarea>
+        <button class="send-btn" id="send-btn" onclick="send()">↑</button>
+      </div>
+    </div>
+
+    <!-- LEADS -->
+    <div class="tab-content" id="tab-leads">
+      <div><div class="section-title">Add a lead</div><div class="section-sub">Manually add an affiliate prospect</div></div>
+      <div class="card">
+        <div class="form-grid">
+          <div class="fg"><label>Full name</label><input id="l-name" placeholder="e.g. Thomas Vishiti"></div>
+          <div class="fg"><label>Email</label><input type="email" id="l-email" placeholder="thomas@example.com"></div>
+          <div class="fg"><label>Contact type</label>
+            <select id="l-type">
+              <option value="influencer">Forex / trading influencer</option>
+              <option value="educator">Trading educator / course creator</option>
+              <option value="fundtrader">Fund trader / prop firm community</option>
+              <option value="creator">Financial content creator</option>
+            </select>
+          </div>
+          <div class="fg"><label>Audience size</label><input id="l-audience" placeholder="e.g. 120k YouTube subscribers"></div>
+          <div class="fg"><label>Social handle</label><input id="l-handle" placeholder="@username"></div>
+          <div class="fg"><label>Notes</label><input id="l-notes" placeholder="Any details..."></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="addLead()">Add lead</button>
+          <button class="btn" onclick="addAndGo()">Add + compose email</button>
+        </div>
+      </div>
+      <div>
+        <div class="section-title" style="margin-bottom:12px">Leads (<span id="lead-count">0</span>)</div>
+        <div class="card" id="leads-list"><div class="empty-state">No leads yet.</div></div>
+      </div>
+    </div>
+
+    <!-- FOLLOW-UPS -->
+    <div class="tab-content" id="tab-followups">
+      <div><div class="section-title">Follow-ups due</div><div class="section-sub">Leads contacted 3+ days ago with no reply</div></div>
+      <div id="fu-list"></div>
+    </div>
+
+    <!-- PIPELINE -->
+    <div class="tab-content" id="tab-pipeline">
+      <div class="metrics-row">
+        <div class="metric"><div class="metric-label">Total leads</div><div class="metric-val mv-accent" id="m-total">0</div></div>
+        <div class="metric"><div class="metric-label">Emails sent</div><div class="metric-val" id="m-sent">0</div></div>
+        <div class="metric"><div class="metric-label">Follow-ups due</div><div class="metric-val mv-amber" id="m-fu">0</div></div>
+        <div class="metric"><div class="metric-label">Deals closed</div><div class="metric-val mv-purple" id="m-closed">0</div></div>
+      </div>
+      <div><div class="section-title" style="margin-bottom:12px">Deal pipeline</div>
+      <div class="pipeline-grid" id="pipeline-grid"></div></div>
+    </div>
+
+    <!-- SETUP -->
+    <div class="tab-content" id="tab-setup">
+      <div><div class="section-title">Setup guide</div><div class="section-sub">Deploy your agent to Vercel in 5 minutes</div></div>
+
+      <div class="info-box ok">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#00e5a0" stroke-width="1.3"/><path d="M5 8l2 2 4-4" stroke="#00e5a0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div style="font-size:12px;color:var(--accent)">This app is deployed on Vercel. Your API key is stored securely as a server environment variable — never exposed to the browser.</div>
+      </div>
+
+      <div class="card">
+        <div class="step-title" style="margin-bottom:14px">Deployment steps</div>
+        <div class="setup-step">
+          <div class="step-num">1</div>
+          <div><div class="step-title">Download the project zip</div><div class="step-desc">Get the bg-agent.zip file from Claude and unzip it on your computer</div></div>
+        </div>
+        <div class="setup-step">
+          <div class="step-num">2</div>
+          <div><div class="step-title">Create a free Vercel account</div><div class="step-desc">Go to vercel.com → Sign up with GitHub (free, no credit card needed)</div></div>
+        </div>
+        <div class="setup-step">
+          <div class="step-num">3</div>
+          <div><div class="step-title">Deploy the project</div><div class="step-desc">Vercel dashboard → Add New Project → drag and drop your unzipped folder → Deploy</div></div>
+        </div>
+        <div class="setup-step">
+          <div class="step-num">4</div>
+          <div><div class="step-title">Add your Anthropic API key</div><div class="step-desc">In Vercel project settings → Environment Variables → add:<br><br>
+            Name: <strong style="color:var(--accent);font-family:'DM Mono',monospace">ANTHROPIC_API_KEY</strong><br>
+            Value: your sk-ant-... key<br><br>
+            Then redeploy (Settings → Deployments → Redeploy)
+          </div></div>
+        </div>
+        <div class="setup-step">
+          <div class="step-num">5</div>
+          <div><div class="step-title">Your permanent URL is live</div><div class="step-desc">Vercel gives you a URL like https://bg-affiliate-agent.vercel.app — bookmark it and use it from any device, forever.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let leads = JSON.parse(localStorage.getItem('bg_leads')||'[]');
+let history = [];
+let busy = false;
+
+const typeMap = {
+  influencer:{label:'Influencer',cls:'bg-green',ab:'rgba(0,229,160,0.12)',ac:'#00e5a0'},
+  educator:  {label:'Educator',  cls:'bg-blue', ab:'rgba(0,102,255,0.12)',ac:'#6699ff'},
+  fundtrader:{label:'Fund Trader',cls:'bg-amber',ab:'rgba(245,166,35,0.12)',ac:'#f5a623'},
+  creator:   {label:'Creator',   cls:'bg-purple',ab:'rgba(155,127,232,0.12)',ac:'#9b7fe8'}
+};
+const stageMap={new:'bg-gray',contacted:'bg-blue',replied:'bg-amber',negotiating:'bg-purple',closed:'bg-green'};
+
+function persist(){ localStorage.setItem('bg_leads',JSON.stringify(leads)); refresh(); }
+
+function refresh(){
+  updateSidebar(); renderLeads(); renderPipeline(); renderFollowups();
+}
+
+function getInits(n){ return n.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase(); }
+
+function updateSidebar(){
+  const c={new:0,contacted:0,replied:0,negotiating:0,closed:0};
+  leads.forEach(l=>{ const s=l.stage||'new'; if(c[s]!==undefined)c[s]++; });
+  document.getElementById('sb-new').textContent=c.new;
+  document.getElementById('sb-contacted').textContent=c.contacted;
+  document.getElementById('sb-replied').textContent=c.replied;
+  document.getElementById('sb-neg').textContent=c.negotiating;
+  document.getElementById('sb-closed').textContent=c.closed;
+  const mb=document.getElementById('memory-box');
+  mb.textContent=leads.length?leads.slice(-5).map(l=>`${l.name}\n  → ${l.stage||'new'}`).join('\n'):'No leads yet.';
+}
+
+function renderLeads(){
+  const el=document.getElementById('leads-list');
+  document.getElementById('lead-count').textContent=leads.length;
+  if(!leads.length){el.innerHTML='<div class="empty-state">No leads yet.</div>';return;}
+  el.innerHTML=leads.map((l,i)=>{
+    const t=typeMap[l.type]||typeMap.influencer;
+    const s=stageMap[l.stage||'new']||'bg-gray';
+    return `<div class="lead-item">
+      <div class="lead-av" style="background:${t.ab};color:${t.ac}">${getInits(l.name)}</div>
+      <div class="lead-info">
+        <div class="lead-name">${l.name}</div>
+        <div class="lead-meta">${l.email}${l.handle?' · '+l.handle:''}${l.audience?' · '+l.audience:''}</div>
+      </div>
+      <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;justify-content:flex-end;flex-shrink:0">
+        <span class="badge ${t.cls}">${t.label}</span>
+        <span class="badge ${s}">${l.stage||'new'}</span>
+        <button class="btn btn-sm" onclick="composeLead(${i})">Email</button>
+        <button class="btn btn-sm" onclick="advance(${i})">→</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderPipeline(){
+  const stages=['new','contacted','replied','negotiating','closed'];
+  const labels=['New','Contacted','Replied','Negotiating','Closed'];
+  const accents=['var(--text3)','#6699ff','var(--amber)','var(--purple)','var(--accent)'];
+  document.getElementById('pipeline-grid').innerHTML=stages.map((s,i)=>{
+    const items=leads.filter(l=>(l.stage||'new')===s);
+    const cards=items.length?items.map(l=>{
+      const t=typeMap[l.type]||typeMap.influencer;
+      return `<div class="pipe-card"><div class="pipe-card-name">${l.name}</div><div class="pipe-card-type">${t.label}${l.audience?' · '+l.audience:''}</div></div>`;
+    }).join(''):`<div style="font-size:10px;color:var(--text3);padding:4px 0">Empty</div>`;
+    return `<div class="pipe-col"><div class="pipe-col-title"><span>${labels[i]}</span><span style="color:${accents[i]};font-size:12px;font-weight:700">${items.length}</span></div>${cards}</div>`;
+  }).join('');
+  const now=Date.now();
+  document.getElementById('m-total').textContent=leads.length;
+  document.getElementById('m-sent').textContent=leads.filter(l=>l.sentAt).length;
+  document.getElementById('m-fu').textContent=leads.filter(l=>l.sentAt&&(now-l.sentAt)>=3*24*60*60*1000&&!l.followupSent&&l.stage==='contacted').length;
+  document.getElementById('m-closed').textContent=leads.filter(l=>l.stage==='closed').length;
+}
+
+function renderFollowups(){
+  const now=Date.now();
+  const el=document.getElementById('fu-list');
+  const due=leads.filter(l=>l.sentAt&&(now-l.sentAt)>=3*24*60*60*1000&&!l.followupSent&&l.stage==='contacted');
+  if(!due.length){el.innerHTML='<div class="card"><div class="empty-state">No follow-ups due yet.</div></div>';return;}
+  el.innerHTML=due.map(l=>{
+    const days=Math.floor((now-l.sentAt)/(24*60*60*1000));
+    const t=typeMap[l.type]||typeMap.influencer;
+    return `<div class="fu-card">
+      <div class="fu-head">
+        <span style="font-family:'Syne',sans-serif;font-weight:500;font-size:13px">${l.name}</span>
+        <span class="days-pill">${days}d since email</span>
+        <span class="badge ${t.cls}">${t.label}</span>
+      </div>
+      <div style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-bottom:10px">${l.email}</div>
+      <div class="btn-row" style="margin-top:0">
+        <button class="btn btn-sm btn-primary" onclick="genFu('${l.id}')">Generate follow-up</button>
+        <button class="btn btn-sm" onclick="markFuSent('${l.id}')">Mark sent</button>
+      </div>
+      <div class="ai-out" id="fu-${l.id}" style="display:none"></div>
+    </div>`;
+  }).join('');
+}
+
+function addLead(){
+  const name=document.getElementById('l-name').value.trim();
+  const email=document.getElementById('l-email').value.trim();
+  if(!name||!email){alert('Name and email required.');return;}
+  leads.push({id:Date.now().toString(),name,email,type:document.getElementById('l-type').value,audience:document.getElementById('l-audience').value.trim(),handle:document.getElementById('l-handle').value.trim(),notes:document.getElementById('l-notes').value.trim(),stage:'new',sentAt:null,followupSent:false});
+  persist();
+  ['l-name','l-email','l-audience','l-handle','l-notes'].forEach(id=>document.getElementById(id).value='');
+}
+
+function addAndGo(){
+  addLead();
+  gotoTab('chat',document.querySelector('.nav-item'));
+  qs('Write a personalized outreach email for my latest lead');
+}
+
+function advance(i){
+  const stages=['new','contacted','replied','negotiating','closed'];
+  const cur=stages.indexOf(leads[i].stage||'new');
+  leads[i].stage=stages[Math.min(cur+1,stages.length-1)];
+  if(leads[i].stage==='contacted'&&!leads[i].sentAt)leads[i].sentAt=Date.now();
+  persist();
+}
+
+function composeLead(i){
+  const l=leads[i];
+  const t=typeMap[l.type]||typeMap.influencer;
+  gotoTab('chat',document.querySelectorAll('.nav-item')[0]);
+  qs(`Write a personalized outreach email for ${l.name}, a ${t.label}${l.audience?' with '+l.audience+' audience':''}`);
+}
+
+async function genFu(id){
+  const lead=leads.find(l=>l.id===id);
+  if(!lead)return;
+  const el=document.getElementById('fu-'+id);
+  el.style.display='block';
+  el.textContent='Generating follow-up...';
+  const days=Math.floor((Date.now()-lead.sentAt)/(24*60*60*1000));
+  const t=typeMap[lead.type]||typeMap.influencer;
+  try{
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,messages:[{role:'user',content:`Write a short follow-up email (under 100 words) to ${lead.name}, a ${t.label}, who hasn't replied to our Blue Guardian affiliate invitation sent ${days} days ago. Warm tone, add urgency, reiterate value. Include subject line. Sign off as: Prince — Affiliate Manager, Blue Guardian.`}]})});
+    const data=await res.json();
+    el.textContent=data.content?.[0]?.text||'Error generating. Try again.';
+  }catch(e){el.textContent='Connection error. Try again.';}
+}
+
+function markFuSent(id){
+  const l=leads.find(x=>x.id===id);
+  if(l){l.followupSent=true;persist();}
+}
+
+const SYSTEM=`You are an elite AI affiliate outreach agent for Prince, the Affiliate Manager at Blue Guardian — a leading proprietary trading firm. Your mission: autonomously recruit high-quality affiliates (Forex influencers, trading educators, fund traders, financial content creators).
+
+Tools — format as [TOOL: name] description:
+- add_lead(name, email, type, audience, handle)
+- write_email(lead) — personalized outreach, under 150 words
+- log_email_sent(lead_name)
+- check_followups()
+- schedule_followup(lead_name)
+- draft_reply(lead_name, their_message)
+- move_pipeline(lead_name, stage)
+- show_pipeline()
+
+Be autonomous. Break goals into steps. Sharp, professional, sales-focused. Sign emails: Prince — Affiliate Manager, Blue Guardian.`;
+
+function addMsg(role,text,thinking=false){
+  const c=document.getElementById('messages');
+  const d=document.createElement('div');
+  d.className='msg '+(role==='user'?'user':'agent');
+  if(thinking){d.id='thinking-msg';d.innerHTML=`<div class="av agent">BG</div><div class="bubble thinking">Thinking and planning...</div>`;c.appendChild(d);c.scrollTop=c.scrollHeight;return;}
+  const parts=text.split(/(\[TOOL:[^\]]*\][^\[]*)/g);
+  let bubbleHtml='';
+  let toolHtml='';
+  let hasText=false;
+  parts.forEach(p=>{
+    const m=p.match(/\[TOOL:\s*([^\]]+)\]([\s\S]*)/);
+    if(m){
+      toolHtml+=`<div class="tool-block"><div class="tool-label">${m[1].trim()}</div><div class="tool-desc">${m[2].trim().replace(/\n/g,'<br>')}</div></div>`;
+    }else if(p.trim()){
+      bubbleHtml+=p.replace(/\n/g,'<br>');
+      hasText=true;
+    }
+  });
+  const av=`<div class="av ${role==='user'?'user':'agent'}">${role==='user'?'P':'BG'}</div>`;
+  const bubbleCls=role==='user'?'user':'agent';
+  let inner='<div style="display:flex;flex-direction:column;gap:5px;max-width:78%">';
+  if(hasText)inner+=`<div class="bubble ${bubbleCls}">${bubbleHtml}</div>`;
+  if(toolHtml)inner+=toolHtml;
+  inner+='</div>';
+  d.innerHTML=av+inner;
+  c.appendChild(d);c.scrollTop=c.scrollHeight;
+}
+
+async function send(){
+  const inp=document.getElementById('user-inp');
+  const btn=document.getElementById('send-btn');
+  const text=inp.value.trim();
+  if(!text||busy)return;
+  inp.value='';inp.style.height='40px';busy=true;btn.disabled=true;
+  addMsg('user',text);
+  const ctx=leads.length?'\n\n[Leads: '+leads.map(l=>`${l.name}(${l.stage||'new'},${l.email})`).join(';')+']':'';
+  history.push({role:'user',content:text+ctx});
+  addMsg('agent','',true);
+  try{
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,system:SYSTEM,messages:history})});
+    const data=await res.json();
+    const reply=data.content?.map(b=>b.text||'').join('')||'Something went wrong.';
+    document.getElementById('thinking-msg')?.remove();
+    addMsg('agent',reply);
+    history.push({role:'assistant',content:reply});
+    if(/log_email_sent|marked.*sent/i.test(reply)){
+      const last=leads[leads.length-1];
+      if(last&&!last.sentAt){last.sentAt=Date.now();last.stage='contacted';persist();}
+    }
+  }catch(e){
+    document.getElementById('thinking-msg')?.remove();
+    addMsg('agent','Connection error. Make sure the app is deployed on Vercel and your ANTHROPIC_API_KEY environment variable is set.');
+  }
+  busy=false;btn.disabled=false;
+}
+
+function qs(t){document.getElementById('user-inp').value=t;send();}
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}}
+function autoH(el){el.style.height='40px';el.style.height=Math.min(el.scrollHeight,110)+'px';}
+
+function gotoTab(t,navEl){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(navEl)navEl.classList.add('active');
+  else document.querySelectorAll('.nav-item').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+t+"'"))n.classList.add('active');});
+  document.querySelectorAll('.tab-content,.chat-tab').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  if(t==='pipeline')renderPipeline();
+  if(t==='followups')renderFollowups();
+}
+
+document.getElementById('date-el').textContent=new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+addMsg('agent',`Hello Prince! BG Affiliate Agent is deployed and ready.\n\nI'm running on a real server now — no more connection errors.\n\nTell me your first command. For example:\n"Add Thomas Vishiti — Forex influencer, 120k YouTube subscribers, vishitip@gmail.com"\n\nI'll write a personalized outreach email and we move from there.`);
+refresh();
+</script>
+</body>
+</html>
